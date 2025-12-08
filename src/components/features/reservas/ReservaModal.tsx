@@ -1,0 +1,202 @@
+/**
+ * Modal de Crear/Editar Reserva
+ */
+
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Modal, Input, Select, Textarea, Button } from '@/components/ui';
+import { useUIStore } from '@/stores';
+import { useReservas, useReservaById } from '@/hooks';
+import { VALIDATION_RULES, ESTADOS_MEXICO } from '@/constants';
+import { toInputDate } from '@/utils/format';
+import toast from 'react-hot-toast';
+import type { CreateReservaDTO } from '@/types';
+import { AxiosError } from 'axios';
+
+const reservaSchema = z.object({
+  libras: z
+    .number()
+    .min(VALIDATION_RULES.LIBRAS.MIN, `Mínimo ${VALIDATION_RULES.LIBRAS.MIN} libras`)
+    .max(VALIDATION_RULES.LIBRAS.MAX, `Máximo ${VALIDATION_RULES.LIBRAS.MAX} libras`),
+  fecha: z.string().min(1, 'La fecha es requerida'),
+  estado: z.string().min(1, 'El estado es requerido'),
+  observaciones: z
+    .string()
+    .max(VALIDATION_RULES.OBSERVACIONES.MAX_LENGTH, `Máximo ${VALIDATION_RULES.OBSERVACIONES.MAX_LENGTH} caracteres`)
+    .optional(),
+});
+
+type ReservaFormData = z.infer<typeof reservaSchema>;
+
+interface ReservaModalProps {
+  onSuccess: () => void;
+}
+
+export const ReservaModal = ({ onSuccess }: ReservaModalProps) => {
+  const { isReservaModalOpen, reservaModalMode, reservaModalId, closeReservaModal } = useUIStore();
+  const { createReserva, isCreating, updateReserva, isUpdating } = useReservas();
+  const { data: reservaResponse } = useReservaById(reservaModalId);
+  const reservaData = reservaResponse?.data.data;
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    setValue,
+  } = useForm<ReservaFormData>({
+    resolver: zodResolver(reservaSchema),
+  });
+
+  // Cargar datos si es edición
+  useEffect(() => {
+    if (reservaModalMode === 'edit' && reservaData) {
+      setValue('libras', parseFloat(reservaData.libras.toString()));
+      setValue('fecha', toInputDate(reservaData.fecha));
+      setValue('estado', reservaData.estado);
+      setValue('observaciones', reservaData.observaciones || '');
+    } else if (reservaModalMode === 'create') {
+      reset();
+    }
+  }, [reservaModalMode, reservaData, setValue, reset]);
+
+  const onSubmit = (data: ReservaFormData) => {
+    const reservaData: CreateReservaDTO = {
+      libras: data.libras,
+      fecha: data.fecha,
+      estado: data.estado,
+      observaciones: data.observaciones,
+    };
+
+    if (reservaModalMode === 'create') {
+      createReserva(reservaData, {
+  onSuccess: (response) => {
+    const mensaje = response?.data?.message || 'Reserva creada correctamente';
+    
+    // Si la reserva fue dividida, mostrar alerta especial
+    if (mensaje.includes('dividida')) {
+      toast.success(mensaje, {
+        duration: 8000,
+        style: {
+          background: '#fef3c7',
+          color: '#92400e',
+          border: '2px solid #f59e0b',
+          fontSize: '14px',
+          fontWeight: '600',
+          maxWidth: '500px',
+        },
+      });
+    } else {
+      toast.success(mensaje);
+    }
+    
+    closeReservaModal();
+    reset();
+    onSuccess();
+  },
+  onError: (error: AxiosError<{ message?: string }>) => {
+    const mensaje = error.response?.data?.message || 'Error al crear reserva';
+    toast.error(mensaje, {
+      duration: 6000,
+    });
+  },
+});
+    } else if (reservaModalMode === 'edit' && reservaModalId) {
+      updateReserva(
+        { reservaId: reservaModalId, data: reservaData },
+        {
+          onSuccess: () => {
+            toast.success('Reserva actualizada correctamente');
+            closeReservaModal();
+            reset();
+            onSuccess();
+          },
+          onError: (error: AxiosError<{ message?: string }>) => {
+            toast.error(error.response?.data?.message || 'Error al actualizar reserva');
+          },
+        }
+      );
+    }
+  };
+
+  const handleClose = () => {
+    closeReservaModal();
+    reset();
+  };
+
+  return (
+    <Modal
+      isOpen={isReservaModalOpen}
+      onClose={handleClose}
+      title={reservaModalMode === 'create' ? 'Nueva Reserva' : 'Editar Reserva'}
+      size="md"
+    >
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
+        {/* Libras */}
+        <Input
+          {...register('libras', { valueAsNumber: true })}
+          type="number"
+          step="0.01"
+          label="Libras"
+          placeholder="50.00"
+          error={errors.libras?.message}
+          required
+        />
+
+        {/* Fecha */}
+        <Input
+          {...register('fecha')}
+          type="date"
+          label="Fecha de envío"
+          error={errors.fecha?.message}
+          required
+        />
+
+        {/* Estado */}
+        <Select
+          {...register('estado')}
+          label="Estado (destino)"
+          error={errors.estado?.message}
+          options={[
+            { value: '', label: 'Selecciona un estado' },
+            ...ESTADOS_MEXICO.map((estado) => ({
+              value: estado,
+              label: estado,
+            })),
+          ]}
+          required
+        />
+
+        {/* Observaciones */}
+        <Textarea
+          {...register('observaciones')}
+          label="Observaciones"
+          placeholder="Notas adicionales sobre la reserva..."
+          rows={3}
+          error={errors.observaciones?.message}
+        />
+
+        {/* Botones */}
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 pt-3 sm:pt-4">
+  <Button
+    type="button"
+    variant="secondary"
+    onClick={handleClose}
+    className="w-full sm:w-auto"
+  >
+    Cancelar
+  </Button>
+  <Button
+    type="submit"
+    isLoading={isCreating || isUpdating}
+    className="w-full sm:w-auto"
+  >
+    {reservaModalMode === 'create' ? 'Crear' : 'Guardar'} Reserva
+  </Button>
+</div>
+      </form>
+    </Modal>
+  );
+};
