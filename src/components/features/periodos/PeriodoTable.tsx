@@ -65,10 +65,10 @@ export const PeriodoTable = ({ periodos }: PeriodoTableProps) => {
               <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
                 <div className="text-xs sm:text-sm">
                   <p className="font-medium text-gray-900">
-                    {formatDate(periodo.fechaInicio)}
+                    {formatDate(periodo.fechaEnvio)}
                   </p>
                   <p className="text-gray-500 text-xs">
-                    {formatDate(periodo.fechaFin)}
+                    Fecha de envío
                   </p>
                 </div>
               </td>

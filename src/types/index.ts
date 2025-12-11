@@ -45,8 +45,7 @@ export interface Session {
 export interface PeriodoLibras {
   id: number;
   librasTotales: number;
-  fechaInicio: string;
-  fechaFin: string;
+  fechaEnvio: string; // Fecha única de envío
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -74,8 +73,7 @@ export interface Reserva {
   periodo?: {
     id: number;
     librasTotales: number;
-    fechaInicio: string;
-    fechaFin: string;
+    fechaEnvio: string; // Fecha única de envío
   };
 }
 
@@ -84,8 +82,7 @@ export interface HistoricoPeriodo {
   librasTotales: number;
   librasReservadas: string;
   librasDisponibles: string;
-  fechaInicio: string;
-  fechaFin: string;
+  fechaEnvio: string; // Fecha única de envío
   totalReservas: number;
   totalUsuarios: number;
   fechaArchivado: string;
@@ -101,8 +98,7 @@ export interface HistoricoReserva {
   estado: string;
   observaciones: string | null;
   status: StatusReserva;
-  periodoFechaInicio: string;
-  periodoFechaFin: string;
+  periodoFechaEnvio: string; // Fecha única de envío
   reservaOriginalId: number;
   fechaArchivado: string;
 }
@@ -149,14 +145,12 @@ export interface UpdateUserDTO {
 
 export interface CreatePeriodoDTO {
   librasTotales: number;
-  fechaInicio: string;
-  fechaFin: string;
+  fechaEnvio: string; // Fecha única de envío
 }
 
 export interface UpdatePeriodoDTO {
   librasTotales?: number;
-  fechaInicio?: string;
-  fechaFin?: string;
+  fechaEnvio?: string; // Fecha única de envío
 }
 
 export interface CreateReservaDTO {
@@ -221,8 +215,7 @@ export interface PeriodoStats {
   periodo: {
     id: number;
     librasTotales: number;
-    fechaInicio: string;
-    fechaFin: string;
+    fechaEnvio: string; // Fecha única de envío
     isActive: boolean;
   };
   librasReservadas: string;
@@ -283,7 +276,7 @@ export interface PeriodoFilters extends PaginationParams {
 export interface HistoricoFilters extends PaginationParams {
   startDate?: string;
   endDate?: string;
-  orderBy?: 'fechaArchivado' | 'fechaInicio' | 'fechaFin' | 'librasTotales' | 'totalReservas';
+  orderBy?: 'fechaArchivado' | 'fechaEnvio' | 'librasTotales' | 'totalReservas';
   orderDirection?: 'asc' | 'desc';
 }
 
@@ -312,8 +305,7 @@ export interface ReporteMensual {
 
 export interface ReportePeriodo {
   periodoId: number;
-  fechaInicio: string;
-  fechaFin: string;
+  fechaEnvio: string; // Fecha única de envío
   librasTotales: number;
   librasReservadas: string;
   porcentajeOcupacion: number;

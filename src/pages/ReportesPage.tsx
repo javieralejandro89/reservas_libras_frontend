@@ -88,8 +88,7 @@ export const ReportesPage = () => {
       // Hoja 4: Por Periodo
       const periodosData = reportes.porPeriodo.map(p => ({
         'ID': p.periodoId,
-        'Fecha Inicio': p.fechaInicio,
-        'Fecha Fin': p.fechaFin,
+        'Fecha de Envío': p.fechaEnvio,
         'Libras Totales': p.librasTotales,
         'Libras Reservadas': parseFloat(p.librasReservadas),
         'Ocupación %': p.porcentajeOcupacion.toFixed(2),
@@ -423,7 +422,7 @@ export const ReportesPage = () => {
                   ID
                 </th>
                 <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-600 uppercase">
-                  Fechas
+                  Fecha Envío
                 </th>
                 <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-600 uppercase">
                   Totales
@@ -449,10 +448,7 @@ export const ReportesPage = () => {
                     #{periodo.periodoId}
                   </td>
                   <td className="px-2 sm:px-4 py-2 sm:py-3 text-sm text-gray-700">
-                    <div>
-                      <p className="font-medium">{periodo.fechaInicio}</p>
-                      <p className="text-xs text-gray-500">{periodo.fechaFin}</p>
-                    </div>
+                    <p className="font-medium">Envío: {periodo.fechaEnvio}</p>
                   </td>
                   <td className="px-2 sm:px-4 py-2 sm:py-3 text-sm text-gray-700">
                     {periodo.librasTotales.toLocaleString()}

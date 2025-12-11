@@ -19,11 +19,7 @@ const periodoSchema = z.object({
     .number()
     .min(1, 'Mínimo 1 libra')
     .max(100000, 'Máximo 100,000 libras'),
-  fechaInicio: z.string().min(1, 'La fecha de inicio es requerida'),
-  fechaFin: z.string().min(1, 'La fecha de fin es requerida'),
-}).refine((data) => new Date(data.fechaFin) > new Date(data.fechaInicio), {
-  message: 'La fecha de fin debe ser posterior a la fecha de inicio',
-  path: ['fechaFin'],
+  fechaEnvio: z.string().min(1, 'La fecha de envío es requerida'),
 });
 
 type PeriodoFormData = z.infer<typeof periodoSchema>;
@@ -49,11 +45,11 @@ export const PeriodoModal = () => {
   });
 
   // Cargar datos si es edición
+  // Cargar datos si es edición
   useEffect(() => {
     if (periodoModalMode === 'edit' && periodoData) {
       setValue('librasTotales', periodoData.librasTotales);
-      setValue('fechaInicio', toInputDate(periodoData.fechaInicio));
-      setValue('fechaFin', toInputDate(periodoData.fechaFin));
+      setValue('fechaEnvio', toInputDate(periodoData.fechaEnvio));
     } else if (periodoModalMode === 'create') {
       reset({
         librasTotales: APP_CONFIG.DEFAULT_LIBRAS_TOTALES,
@@ -64,8 +60,7 @@ export const PeriodoModal = () => {
   const onSubmit = (data: PeriodoFormData) => {
     const periodoPayload: CreatePeriodoDTO = {
       librasTotales: data.librasTotales,
-      fechaInicio: data.fechaInicio,
-      fechaFin: data.fechaFin,
+      fechaEnvio: data.fechaEnvio,
     };
 
     if (periodoModalMode === 'create') {
@@ -121,21 +116,13 @@ export const PeriodoModal = () => {
           required
         />
 
-        {/* Fecha Inicio */}
+        {/* Fecha de Envío */}
         <Input
-          {...register('fechaInicio')}
+          {...register('fechaEnvio')}
           type="date"
-          label="Fecha de Inicio"
-          error={errors.fechaInicio?.message}
-          required
-        />
-
-        {/* Fecha Fin */}
-        <Input
-          {...register('fechaFin')}
-          type="date"
-          label="Fecha de Fin"
-          error={errors.fechaFin?.message}
+          label="Fecha de Envío"
+          error={errors.fechaEnvio?.message}
+          helperText="Fecha en que sale el envío de paquetería"
           required
         />
 

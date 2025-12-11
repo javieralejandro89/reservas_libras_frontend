@@ -49,11 +49,10 @@ export const HistoricoFiltersComponent = ({
         <Select
           label="Ordenar por"
           value={filters.orderBy || 'fechaArchivado'}
-          onChange={(e) => onFilterChange({ orderBy: e.target.value as 'fechaArchivado' | 'fechaInicio' | 'fechaFin' | 'librasTotales' | 'totalReservas' })}
+          onChange={(e) => onFilterChange({ orderBy: e.target.value as 'fechaArchivado' | 'fechaEnvio' | 'librasTotales' | 'totalReservas' })}
           options={[
             { value: 'fechaArchivado', label: 'Fecha de Archivo' },
-            { value: 'fechaInicio', label: 'Fecha de Inicio' },
-            { value: 'fechaFin', label: 'Fecha de Fin' },
+            { value: 'fechaEnvio', label: 'Fecha de Envío' },
             { value: 'librasTotales', label: 'Libras Totales' },
             { value: 'totalReservas', label: 'Total Reservas' },
           ]}

@@ -29,7 +29,7 @@ export const PeriodoActivo = ({ periodo }: PeriodoActivoProps) => {
           </h2>
         </div>
         <p className="text-xs sm:text-base text-gray-600">
-          {formatDate(periodo.fechaInicio)} - {formatDate(periodo.fechaFin)}
+          Envío: {formatDate(periodo.fechaEnvio)}
         </p>
       </div>
       <div className="p-1.5 sm:p-3 bg-primary-600 rounded-lg">

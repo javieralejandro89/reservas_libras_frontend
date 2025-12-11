@@ -72,8 +72,7 @@ export const HistoricoPage = () => {
       // Preparar datos para Excel
       const excelData = allPeriodos.map((periodo: HistoricoPeriodo) => ({
         'ID': periodo.id,
-        'Fecha Inicio': formatDate(periodo.fechaInicio),
-        'Fecha Fin': formatDate(periodo.fechaFin),
+        'Fecha de Envío': formatDate(periodo.fechaEnvio),
         'Fecha Archivado': formatDate(periodo.fechaArchivado),
         'Libras Totales': periodo.librasTotales,
         'Libras Reservadas': parseFloat(periodo.librasReservadas),
@@ -214,7 +213,7 @@ export const HistoricoPage = () => {
                         <span className="text-sm text-gray-600">Periodo #{periodo.id}</span>
                       </div>
                       <p className="text-sm font-medium text-gray-900">
-                        {formatDate(periodo.fechaInicio)} - {formatDate(periodo.fechaFin)}
+                        Envío: {formatDate(periodo.fechaEnvio)}
                       </p>
                       <p className="text-xs text-gray-600 mt-1">
                         Archivado: {formatDate(periodo.fechaArchivado)}

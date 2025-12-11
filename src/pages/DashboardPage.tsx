@@ -155,7 +155,7 @@ export const DashboardPage = () => {
                           <span className="text-sm text-gray-600">Periodo #{periodoStats.periodo.id}</span>
                         </div>
                         <p className="text-sm font-medium text-gray-900">
-                          {formatDate(periodoStats.periodo.fechaInicio)} - {formatDate(periodoStats.periodo.fechaFin)}
+                          Envío: {formatDate(periodoStats.periodo.fechaEnvio)}
                         </p>
                       </div>
                     </div>
