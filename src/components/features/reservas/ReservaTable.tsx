@@ -7,7 +7,7 @@ import { useUIStore, useAuthStore } from '@/stores';
 import { useReservas } from '@/hooks';
 import { formatLibras, formatDate } from '@/utils/format';
 import { STATUS_LABELS, STATUS_COLORS, STATUS_RESERVA, getAvailableStatuses, ROLES } from '@/constants';
-import { Edit, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Edit, Trash2, ChevronLeft, ChevronRight, Calendar, Check, Truck, Home } from 'lucide-react';
 import type { Reserva, StatusReserva } from '@/types';
 import { ConfirmModal } from '../ConfirmModal';
 import { useState } from 'react';
@@ -71,9 +71,9 @@ export const ReservaTable = ({
 
   return (
     <>
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
+      <div className="overflow-x-auto -mx-4 sm:mx-0">
+        <table className="w-full min-w-[900px]">
+          <thead className="bg-gray-50 border-b border-gray-200 text-xs sm:text-sm">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 ID
@@ -85,13 +85,16 @@ export const ReservaTable = ({
                 Libras
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Fecha
+                Fecha Reserva
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Estado
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Status
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Historial de Reservas
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Observaciones
@@ -104,10 +107,10 @@ export const ReservaTable = ({
           <tbody className="bg-white divide-y divide-gray-200">
             {reservas.map((reserva) => (
               <tr key={reserva.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-sm text-gray-900">
                   #{reserva.id}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
                   <div>
                     <p className="text-sm font-medium text-gray-900">
                       {reserva.user?.name}
@@ -115,18 +118,18 @@ export const ReservaTable = ({
                     <p className="text-sm text-gray-500">{reserva.user?.email}</p>
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
                   <span className="text-sm font-semibold text-gray-900">
                     {formatLibras(reserva.libras)}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-sm text-gray-900">
                   {formatDate(reserva.fecha)}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-sm text-gray-900">
                   {reserva.estado}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
   {isAdmin && user ? (
     (() => {
       const availableStatuses = getAvailableStatuses(reserva.status, user.role);
@@ -182,10 +185,79 @@ export const ReservaTable = ({
     </Badge>
   )}
 </td>
+                {/* Tracking responsivo */}
+                <td className="px-2 sm:px-6 py-2 sm:py-4">
+                  <div className="space-y-1 min-w-[200px]">
+                    {/* Creada */}
+                    <div className="flex items-center gap-2 text-xs">
+                      <Calendar className="w-3 h-3 text-gray-400 flex-shrink-0" />
+                      <span className="text-gray-600">Creada:</span>
+                      <span className="font-medium text-gray-900">{formatDate(reserva.createdAt)}</span>
+                    </div>
+                    
+                    {/* Confirmada */}
+                    {reserva.fechaConfirmacion ? (
+                      <div className="flex items-center gap-2 text-xs">
+                        <Check className="w-3 h-3 text-blue-600 flex-shrink-0" />
+                        <span className="text-gray-600">Confirmada:</span>
+                        <span className="font-medium text-blue-900">{formatDate(reserva.fechaConfirmacion)}</span>
+                      </div>
+                    ) : (
+                      reserva.status !== 'PENDIENTE' && reserva.status !== 'CANCELADA' && (
+                        <div className="flex items-center gap-2 text-xs">
+                          <Check className="w-3 h-3 text-gray-300 flex-shrink-0" />
+                          <span className="text-gray-400 italic">Sin registrar</span>
+                        </div>
+                      )
+                    )}
+                    
+                    {/* Enviada */}
+                    {reserva.fechaEnvio ? (
+                      <div className="flex items-center gap-2 text-xs">
+                        <Truck className="w-3 h-3 text-purple-600 flex-shrink-0" />
+                        <span className="text-gray-600">Enviada:</span>
+                        <span className="font-medium text-purple-900">{formatDate(reserva.fechaEnvio)}</span>
+                      </div>
+                    ) : (
+                      (reserva.status === 'ENVIADA' || reserva.status === 'ENTREGADA') && (
+                        <div className="flex items-center gap-2 text-xs">
+                          <Truck className="w-3 h-3 text-gray-300 flex-shrink-0" />
+                          <span className="text-gray-400 italic">Sin registrar</span>
+                        </div>
+                      )
+                    )}
+                    
+                    {/* Entregada */}
+                    {reserva.fechaEntrega ? (
+                      <div className="flex items-center gap-2 text-xs">
+                        <Home className="w-3 h-3 text-green-600 flex-shrink-0" />
+                        <span className="text-gray-600">Entregada:</span>
+                        <span className="font-medium text-green-900">{formatDate(reserva.fechaEntrega)}</span>
+                      </div>
+                    ) : (
+                      reserva.status === 'ENTREGADA' && (
+                        <div className="flex items-center gap-2 text-xs">
+                          <Home className="w-3 h-3 text-gray-300 flex-shrink-0" />
+                          <span className="text-gray-400 italic">Sin registrar</span>
+                        </div>
+                      )
+                    )}
+                    
+                    {/* Cancelada */}
+                    {reserva.status === 'CANCELADA' && (
+                      <div className="flex items-center gap-2 text-xs">
+                        <span className="px-2 py-0.5 bg-red-100 text-red-800 rounded text-[10px] font-medium">
+                          Cancelada
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </td>
+
                 <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
                   {reserva.observaciones || '-'}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex items-center justify-end gap-2">
                     {canEdit(reserva) && (
                       <>

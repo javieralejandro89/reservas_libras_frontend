@@ -61,6 +61,10 @@ export interface Reserva {
   estado: string;
   observaciones: string | null;
   status: StatusReserva;
+  // Tracking de cambios de estado
+  fechaConfirmacion: string | null;
+  fechaEnvio: string | null;
+  fechaEntrega: string | null;
   userId: number;
   periodoId: number;
   createdAt: string;
