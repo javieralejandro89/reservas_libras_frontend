@@ -74,6 +74,7 @@ export interface Reserva {
     id: number;
     name: string;
     email: string;
+    avatar?: string | null;
   };
   periodo?: {
     id: number;

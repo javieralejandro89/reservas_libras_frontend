@@ -144,6 +144,7 @@ const handleReservaSuccess = () => {
             filters={filters}
             onFilterChange={handleFilterChange}
             isAdmin={canManageStatus}
+            currentUserId={user?.id}
           />
         )}
       </Card>

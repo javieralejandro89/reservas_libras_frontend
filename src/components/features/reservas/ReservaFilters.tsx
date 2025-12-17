@@ -3,33 +3,45 @@
  */
 
 import { Select, Input, Button } from '@/components/ui';
-import { STATUS_RESERVA, STATUS_LABELS, ESTADOS_MEXICO } from '@/constants';
+import { STATUS_RESERVA, STATUS_LABELS } from '@/constants';
 import type { ReservaFilters as ReservaFiltersType } from '@/types';
 import { X } from 'lucide-react';
 import type { StatusReserva } from '@/types';
+import { useUsers } from '@/hooks';
 
 interface ReservaFiltersComponentProps {
   filters: ReservaFiltersType;
   onFilterChange: (filters: Partial<ReservaFiltersType>) => void;
   isAdmin: boolean;
+  currentUserId?: number;
 }
 
-export const ReservaFilters = ({ filters, onFilterChange }: ReservaFiltersComponentProps) => {
+export const ReservaFilters = ({ 
+  filters, 
+  onFilterChange, 
+  isAdmin,
+  currentUserId 
+}: ReservaFiltersComponentProps) => {
+  // Obtener lista de usuarios (solo si es admin)
+  const { users } = useUsers(isAdmin ? {} : undefined);
+  
+  // Filtrar usuarios que tienen reservas
+  const usersWithReservas = users.filter(user => user.id !== currentUserId);
   const hasActiveFilters = 
     filters.status || 
-    filters.estado || 
+    filters.userId ||
     filters.startDate || 
     filters.endDate;
 
   const clearFilters = () => {
     onFilterChange({
       status: undefined,
-      estado: undefined,
+      userId: undefined,
       startDate: undefined,
       endDate: undefined,
-      userId: undefined,
     });
   };
+  
 
   return (
   <div className="space-y-4 w-full overflow-hidden">
@@ -48,19 +60,23 @@ export const ReservaFilters = ({ filters, onFilterChange }: ReservaFiltersCompon
           ]}
         />
 
-        {/* Estado (ubicación) */}
-        <Select
-          label="Estado (ubicación)"
-          value={filters.estado || ''}
-          onChange={(e) => onFilterChange({ estado: e.target.value || undefined })}
-          options={[
-            { value: '', label: 'Todos los estados' },
-            ...ESTADOS_MEXICO.map((estado) => ({
-              value: estado,
-              label: estado,
-            })),
-          ]}
-        />
+        {/* Filtro de Usuario (solo para admin) */}
+        {isAdmin && (
+          <Select
+            label="Usuario"
+            value={filters.userId?.toString() || ''}
+            onChange={(e) => onFilterChange({ 
+              userId: e.target.value ? parseInt(e.target.value, 10) : undefined 
+            })}
+            options={[
+              { value: '', label: 'Todos los usuarios' },
+              ...usersWithReservas.map((user) => ({
+                value: user.id.toString(),
+                label: user.name,
+              })),
+            ]}
+          />
+        )}
 
         {/* Fecha inicio */}
         <Input

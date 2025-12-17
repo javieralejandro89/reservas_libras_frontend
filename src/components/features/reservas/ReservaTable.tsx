@@ -8,6 +8,7 @@ import { useReservas } from '@/hooks';
 import { formatLibras, formatDate } from '@/utils/format';
 import { STATUS_LABELS, STATUS_COLORS, STATUS_RESERVA, getAvailableStatuses, ROLES } from '@/constants';
 import { Edit, Trash2, ChevronLeft, ChevronRight, Calendar, Check, Truck, Home } from 'lucide-react';
+import { getInitials } from '@/utils/format';
 import type { Reserva, StatusReserva } from '@/types';
 import { ConfirmModal } from '../ConfirmModal';
 import { useState } from 'react';
@@ -38,6 +39,12 @@ export const ReservaTable = ({
   const { user } = useAuthStore();
   const { deleteReserva, isDeleting, updateStatus, isUpdatingStatus } = useReservas();
   const [deleteId, setDeleteId] = useState<number | null>(null);
+
+  // Construir URL del avatar
+  const getAvatarUrl = (avatarPath: string | null | undefined) => {
+    if (!avatarPath) return null;
+    return avatarPath; // Ya pasa por el proxy de Vite en desarrollo
+  };
 
   const canEdit = (reserva: Reserva) => {
     return isAdmin || reserva.userId === currentUserId;
@@ -74,10 +81,7 @@ export const ReservaTable = ({
       <div className="overflow-x-auto -mx-4 sm:mx-0">
         <table className="w-full min-w-[900px]">
           <thead className="bg-gray-50 border-b border-gray-200 text-xs sm:text-sm">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                ID
-              </th>
+            <tr>              
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Usuario
               </th>
@@ -107,15 +111,27 @@ export const ReservaTable = ({
           <tbody className="bg-white divide-y divide-gray-200">
             {reservas.map((reserva) => (
               <tr key={reserva.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-sm text-gray-900">
-                  #{reserva.id}
-                </td>
                 <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      {reserva.user?.name}
-                    </p>
-                    <p className="text-sm text-gray-500">{reserva.user?.email}</p>
+                  <div className="flex items-center gap-3">
+                    {/* Avatar */}
+                    {reserva.user?.avatar ? (
+                      <img
+                        src={getAvatarUrl(reserva.user.avatar) || ''}
+                        alt={reserva.user.name}
+                        className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-white font-semibold text-sm border-2 border-gray-200">
+                        {reserva.user?.name ? getInitials(reserva.user.name) : '?'}
+                      </div>
+                    )}
+                    {/* Info */}
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">
+                        {reserva.user?.name}
+                      </p>
+                      <p className="text-xs text-gray-500">{reserva.user?.email}</p>
+                    </div>
                   </div>
                 </td>
                 <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
