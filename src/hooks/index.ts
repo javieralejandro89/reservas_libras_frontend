@@ -8,3 +8,4 @@ export { usePeriodos, usePeriodoById } from './usePeriodos';
 export { useUsers } from './useUsers';
 export { useDashboard } from './useDashboard';
 export { useReportes } from './useReportes';
+export * from './useProfile';

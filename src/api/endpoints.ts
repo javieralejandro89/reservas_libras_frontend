@@ -281,3 +281,50 @@ getReportes: (filters?: ReportesFilters) => {
 },
 
 };
+
+// ============================================
+// PROFILE
+// ============================================
+
+export const profileApi = {
+  /**
+   * Obtener perfil
+   */
+  getProfile: () => {
+    return apiClient.get<ApiResponse<User & { _count?: { reservas: number } }>>('/profile');
+  },
+
+  /**
+   * Actualizar perfil
+   */
+  updateProfile: (data: UpdateProfileDTO) => {
+    return apiClient.patch<ApiResponse<User>>('/profile', data);
+  },
+
+  /**
+   * Cambiar contraseña
+   */
+  changePassword: (data: ChangePasswordDTO) => {
+    return apiClient.patch<ApiResponse>('/profile/password', data);
+  },
+
+  /**
+   * Subir avatar
+   */
+  uploadAvatar: (file: File) => {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    return apiClient.post<ApiResponse<User>>('/profile/avatar', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+
+  /**
+   * Eliminar avatar
+   */
+  deleteAvatar: () => {
+    return apiClient.delete<ApiResponse<User>>('/profile/avatar');
+  },
+};

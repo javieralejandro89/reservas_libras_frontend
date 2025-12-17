@@ -7,7 +7,8 @@ import { Menu, LogOut, User, ChevronDown } from 'lucide-react';
 import { useAuthStore, useUIStore } from '@/stores';
 import { useAuth } from '@/hooks';
 import { getInitials } from '@/utils/format';
-import { ROLE_LABELS } from '@/constants';
+import { useNavigate } from 'react-router-dom';
+import { ROLE_LABELS, ROUTES } from '@/constants';
 import clsx from 'clsx';
 
 export const Navbar = () => {
@@ -16,6 +17,12 @@ export const Navbar = () => {
   const { logout } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+
+  const getAvatarUrl = (avatarPath: string | null | undefined) => {
+    if (!avatarPath) return null;
+    return avatarPath; // Ya viene con /uploads/avatars/...
+  };
 
   // Cerrar dropdown al hacer click fuera
   useEffect(() => {
@@ -92,9 +99,17 @@ export const Navbar = () => {
                 className="relative flex items-center gap-2 p-1 pr-3 rounded-xl hover:bg-gradient-to-br hover:from-gray-50 hover:to-gray-100 transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md group"
               >
                 {/* Avatar */}
-                <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-blue-700 text-white font-semibold text-sm shadow-lg shadow-blue-500/30 group-hover:shadow-xl group-hover:shadow-blue-500/40 transition-all duration-200">
-                  {getInitials(user.name)}
-                </div>
+                {user.avatar ? (
+                  <img
+                    src={getAvatarUrl(user.avatar) || ''}
+                    alt={user.name}
+                    className="w-9 h-9 rounded-lg object-cover shadow-lg shadow-blue-500/30 group-hover:shadow-xl group-hover:shadow-blue-500/40 transition-all duration-200"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-blue-700 text-white font-semibold text-sm shadow-lg shadow-blue-500/30 group-hover:shadow-xl group-hover:shadow-blue-500/40 transition-all duration-200">
+                    {getInitials(user.name)}
+                  </div>
+                )}
 
                 {/* Chevron (Hidden on mobile) */}
                 <ChevronDown
@@ -117,9 +132,17 @@ export const Navbar = () => {
                 {/* User Info Header */}
                 <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-br from-gray-50 to-white">
                   <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-700 text-white font-semibold shadow-md">
-                      {getInitials(user.name)}
-                    </div>
+                    {user.avatar ? (
+                      <img
+                        src={getAvatarUrl(user.avatar) || ''}
+                        alt={user.name}
+                        className="w-10 h-10 rounded-lg object-cover shadow-md"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-700 text-white font-semibold shadow-md">
+                        {getInitials(user.name)}
+                      </div>
+                    )}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-gray-900 truncate">
                         {user.name}
@@ -137,7 +160,7 @@ export const Navbar = () => {
                   <button
                     onClick={() => {
                       setIsDropdownOpen(false);
-                      // TODO: Navigate to profile
+                      navigate(ROUTES.PROFILE);
                     }}
                     className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 transition-all duration-150 group"
                   >

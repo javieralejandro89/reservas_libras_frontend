@@ -28,6 +28,7 @@ export interface User {
   id: number;
   name: string;
   email: string;
+  avatar?: string | null;
   role: Role;
   isActive: boolean;
   createdAt: string;
@@ -124,6 +125,18 @@ export interface RegisterDTO {
 
 export interface UpdateProfileDTO {
   name: string;
+}
+
+export interface ChangeProfilePasswordDTO {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface ProfileData extends User {
+  avatar: string | null;
+  _count?: {
+    reservas: number;
+  };
 }
 
 export interface ChangePasswordDTO {

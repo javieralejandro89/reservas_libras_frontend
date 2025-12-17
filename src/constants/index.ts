@@ -119,11 +119,14 @@ export const ESTADOS_MEXICO = [
   'Michoacán',
   'Monterrey',  
   'Puebla',
+  'Puerto Vallarta',
   'Querétaro',  
   'San Luis Potosí',
   'Saltillo',  
   'Texcoco',
   'Tlaxcala',
+  'Tijuana',
+  'Toluca',
   'Veracruz',
   'Yucatán',
   'Xalapa',
@@ -219,6 +222,7 @@ export const ROUTES = {
   USUARIOS: '/usuarios',
   PERFIL: '/perfil',
   HISTORICO: '/historico',
+  PROFILE: '/profile',
 };
 
 // ============================================

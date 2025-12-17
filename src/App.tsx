@@ -20,6 +20,7 @@ import { PeriodosPage } from '@/pages/PeriodosPage';
 import { UsuariosPage } from '@/pages/UsuariosPage';
 import { HistoricoPage } from '@/pages/HistoricoPage';
 import { ReportesPage } from '@/pages/ReportesPage';
+import { ProfilePage } from '@/pages/ProfilePage';
 
 function App() {
   const { initAuth } = useAuthStore();
@@ -45,6 +46,7 @@ function App() {
           <Route path={ROUTES.REPORTES} element={<ReportesPage />} />
           <Route path={ROUTES.USUARIOS} element={<UsuariosPage />} />
           <Route path={ROUTES.HISTORICO} element={<HistoricoPage />} />
+          <Route path={ROUTES.PROFILE} element={<ProfilePage />} />
         </Route>
       </Route>
 
