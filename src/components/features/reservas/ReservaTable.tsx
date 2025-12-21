@@ -111,29 +111,31 @@ export const ReservaTable = ({
           <tbody className="bg-white divide-y divide-gray-200">
             {reservas.map((reserva) => (
               <tr key={reserva.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
-                  <div className="flex items-center gap-3">
-                    {/* Avatar */}
-                    {reserva.user?.avatar ? (
-                      <img
-                        src={getAvatarUrl(reserva.user.avatar) || ''}
-                        alt={reserva.user.name}
-                        className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-white font-semibold text-sm border-2 border-gray-200">
-                        {reserva.user?.name ? getInitials(reserva.user.name) : '?'}
-                      </div>
-                    )}
-                    {/* Info */}
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        {reserva.user?.name}
-                      </p>
-                      <p className="text-xs text-gray-500">{reserva.user?.email}</p>
-                    </div>
-                  </div>
-                </td>
+                <td className="px-2 sm:px-6 py-2 sm:py-4">
+  <div className="flex items-center gap-2 sm:gap-3">
+    {/* Avatar - más pequeño en móvil */}
+    {reserva.user?.avatar ? (
+      <img
+        src={getAvatarUrl(reserva.user.avatar) || ''}
+        alt={reserva.user.name}
+        className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border-2 border-gray-200 flex-shrink-0"
+      />
+    ) : (
+      <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-white font-semibold text-xs sm:text-sm border-2 border-gray-200 flex-shrink-0">
+        {reserva.user?.name ? getInitials(reserva.user.name) : '?'}
+      </div>
+    )}
+    {/* Info - email oculto en móvil, nombre con wrap */}
+    <div className="min-w-0 flex-1">
+      <p className="text-sm font-medium text-gray-900 break-words">
+        {reserva.user?.name}
+      </p>
+      <p className="text-xs text-gray-500 hidden sm:block truncate">
+        {reserva.user?.email}
+      </p>
+    </div>
+  </div>
+</td>
                 <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
                   <span className="text-sm font-semibold text-gray-900">
                     {formatLibras(reserva.libras)}

@@ -2,15 +2,15 @@
  * Modal de Crear/Editar Reserva
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Modal, Input, Select, Textarea, Button } from '@/components/ui';
 import { useUIStore } from '@/stores';
-import { useReservas, useReservaById } from '@/hooks';
+import { useReservas, useReservaById, usePeriodos } from '@/hooks';
 import { VALIDATION_RULES, ESTADOS_MEXICO } from '@/constants';
-import { toInputDate } from '@/utils/format';
+import { toInputDate, formatDate, formatLibras } from '@/utils/format';
 import toast from 'react-hot-toast';
 import type { CreateReservaDTO } from '@/types';
 import { AxiosError } from 'axios';
@@ -20,7 +20,7 @@ const reservaSchema = z.object({
     .number()
     .min(VALIDATION_RULES.LIBRAS.MIN, `Mínimo ${VALIDATION_RULES.LIBRAS.MIN} libras`)
     .max(VALIDATION_RULES.LIBRAS.MAX, `Máximo ${VALIDATION_RULES.LIBRAS.MAX} libras`),
-  fecha: z.string().min(1, 'La fecha es requerida'),
+  fecha: z.string().min(1, 'La fecha de envío es requerida'),
   estado: z.string().min(1, 'El estado es requerido'),
   observaciones: z
     .string()
@@ -38,7 +38,16 @@ export const ReservaModal = ({ onSuccess }: ReservaModalProps) => {
   const { isReservaModalOpen, reservaModalMode, reservaModalId, closeReservaModal } = useUIStore();
   const { createReserva, isCreating, updateReserva, isUpdating } = useReservas();
   const { data: reservaResponse } = useReservaById(reservaModalId);
+  const { periodos, isLoading: isLoadingPeriodos } = usePeriodos({ isActive: true });
   const reservaData = reservaResponse?.data.data;
+
+  const [selectedPeriodoId, setSelectedPeriodoId] = useState<number | null>(null);
+
+  const [periodosDisponibilidad, setPeriodosDisponibilidad] = useState<Array<{
+    id: number;
+    fechaEnvio: string;
+    disponibles: number;
+  }>>([]);
 
   const {
     register,
@@ -49,6 +58,55 @@ export const ReservaModal = ({ onSuccess }: ReservaModalProps) => {
   } = useForm<ReservaFormData>({
     resolver: zodResolver(reservaSchema),
   });
+
+  // Calcular disponibilidad de periodos
+  useEffect(() => {
+    console.log('🔍 Periodos recibidos:', periodos);
+    console.log('🔍 isLoading:', isLoadingPeriodos);
+    
+    if (periodos && periodos.length > 0) {
+      console.log('📦 Procesando', periodos.length, 'periodos');
+      
+      const periodosConDisp = periodos
+        .map(periodo => {
+          console.log('🔧 Periodo:', {
+            id: periodo.id,
+            fechaEnvio: periodo.fechaEnvio,
+            librasTotales: periodo.librasTotales,
+            tieneReservas: !!periodo.reservas,
+            cantidadReservas: periodo.reservas?.length || 0
+          });
+
+          // Calcular libras reservadas (excluyendo canceladas)
+          const librasReservadas = (periodo.reservas || []).reduce((sum, reserva) => {
+            if (reserva.status !== 'CANCELADA') {
+              return sum + parseFloat(reserva.libras.toString());
+            }
+            return sum;
+          }, 0);
+
+          const disponibles = periodo.librasTotales - librasReservadas;
+          
+          console.log('📊 Cálculo:', {
+            librasReservadas,
+            disponibles,
+            pasaFiltro: disponibles > 0
+          });
+
+          return {
+            id: periodo.id,
+            fechaEnvio: periodo.fechaEnvio,
+            disponibles: disponibles,
+          };
+        })
+        .filter(p => p.disponibles > 0);
+
+      console.log('✅ Periodos con disponibilidad:', periodosConDisp);
+      setPeriodosDisponibilidad(periodosConDisp);
+    } else {
+      console.log('❌ No hay periodos o está vacío');
+    }
+  }, [periodos]);
 
   // Cargar datos si es edición
   useEffect(() => {
@@ -68,41 +126,41 @@ export const ReservaModal = ({ onSuccess }: ReservaModalProps) => {
       fecha: data.fecha,
       estado: data.estado,
       observaciones: data.observaciones,
+      periodoId: selectedPeriodoId || undefined,
     };
 
     if (reservaModalMode === 'create') {
       createReserva(reservaData, {
-  onSuccess: (response) => {
-    const mensaje = response?.data?.message || 'Reserva creada correctamente';
-    
-    // Si la reserva fue dividida, mostrar alerta especial
-    if (mensaje.includes('dividida')) {
-      toast.success(mensaje, {
-        duration: 8000,
-        style: {
-          background: '#fef3c7',
-          color: '#92400e',
-          border: '2px solid #f59e0b',
-          fontSize: '14px',
-          fontWeight: '600',
-          maxWidth: '500px',
+        onSuccess: (response) => {
+          const mensaje = response?.data?.message || 'Reserva creada correctamente';
+          
+          if (mensaje.includes('dividida')) {
+            toast.success(mensaje, {
+              duration: 8000,
+              style: {
+                background: '#fef3c7',
+                color: '#92400e',
+                border: '2px solid #f59e0b',
+                fontSize: '14px',
+                fontWeight: '600',
+                maxWidth: '500px',
+              },
+            });
+          } else {
+            toast.success(mensaje);
+          }
+          
+          closeReservaModal();
+          reset();
+          onSuccess();
+        },
+        onError: (error: AxiosError<{ message?: string }>) => {
+          const mensaje = error.response?.data?.message || 'Error al crear reserva';
+          toast.error(mensaje, {
+            duration: 6000,
+          });
         },
       });
-    } else {
-      toast.success(mensaje);
-    }
-    
-    closeReservaModal();
-    reset();
-    onSuccess();
-  },
-  onError: (error: AxiosError<{ message?: string }>) => {
-    const mensaje = error.response?.data?.message || 'Error al crear reserva';
-    toast.error(mensaje, {
-      duration: 6000,
-    });
-  },
-});
     } else if (reservaModalMode === 'edit' && reservaModalId) {
       updateReserva(
         { reservaId: reservaModalId, data: reservaData },
@@ -145,14 +203,40 @@ export const ReservaModal = ({ onSuccess }: ReservaModalProps) => {
           required
         />
 
-        {/* Fecha */}
-        <Input
-          {...register('fecha')}
-          type="date"
-          label="Fecha de envío"
-          error={errors.fecha?.message}
-          required
-        />
+        {/* Fecha de envío - Select en modo crear, Input disabled en modo editar */}
+        {reservaModalMode === 'create' ? (
+  <Select
+    {...register('fecha')}
+    label="Fecha de envío"
+    error={errors.fecha?.message}
+    disabled={isLoadingPeriodos}
+    onChange={(e) => {
+      // Encontrar el periodo seleccionado
+      const fechaSeleccionada = e.target.value;
+      const periodo = periodosDisponibilidad.find(
+        p => toInputDate(p.fechaEnvio) === fechaSeleccionada
+      );
+      setSelectedPeriodoId(periodo?.id || null);
+    }}
+    options={[
+      { value: '', label: isLoadingPeriodos ? 'Cargando...' : 'Selecciona una fecha de envío' },
+      ...periodosDisponibilidad.map((p) => ({
+        value: toInputDate(p.fechaEnvio),
+        label: `${formatDate(p.fechaEnvio)} (${formatLibras(p.disponibles)} disponibles)`,
+      })),
+    ]}
+    required
+  />
+        ) : (
+          <Input
+            {...register('fecha')}
+            type="date"
+            label="Fecha de envío"
+            error={errors.fecha?.message}
+            disabled
+            required
+          />
+        )}
 
         {/* Estado */}
         <Select
@@ -178,24 +262,34 @@ export const ReservaModal = ({ onSuccess }: ReservaModalProps) => {
           error={errors.observaciones?.message}
         />
 
+        {/* Mensaje si no hay periodos disponibles */}
+        {reservaModalMode === 'create' && !isLoadingPeriodos && periodosDisponibilidad.length === 0 && (
+          <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-sm text-yellow-800">
+              No hay periodos activos con libras disponibles. Contacta al administrador.
+            </p>
+          </div>
+        )}
+
         {/* Botones */}
         <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 pt-3 sm:pt-4">
-  <Button
-    type="button"
-    variant="secondary"
-    onClick={handleClose}
-    className="w-full sm:w-auto"
-  >
-    Cancelar
-  </Button>
-  <Button
-    type="submit"
-    isLoading={isCreating || isUpdating}
-    className="w-full sm:w-auto"
-  >
-    {reservaModalMode === 'create' ? 'Crear' : 'Guardar'} Reserva
-  </Button>
-</div>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleClose}
+            className="w-full sm:w-auto"
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="submit"
+            isLoading={isCreating || isUpdating}
+            disabled={reservaModalMode === 'create' && periodosDisponibilidad.length === 0}
+            className="w-full sm:w-auto"
+          >
+            {reservaModalMode === 'create' ? 'Crear' : 'Guardar'} Reserva
+          </Button>
+        </div>
       </form>
     </Modal>
   );

@@ -53,6 +53,11 @@ export interface PeriodoLibras {
   _count?: {
     reservas: number;
   };
+  reservas?: Array<{
+    id: number;
+    libras: string | number;
+    status: StatusReserva;
+  }>;
 }
 
 export interface Reserva {
@@ -176,6 +181,7 @@ export interface CreateReservaDTO {
   fecha: string;
   estado: string;
   observaciones?: string;
+  periodoId?: number;
 }
 
 export interface UpdateReservaDTO {
@@ -276,9 +282,7 @@ export interface ReservaFilters extends PaginationParams {
   userId?: number;
   status?: StatusReserva;
   estado?: string;
-  periodoId?: number;
-  startDate?: string;
-  endDate?: string;
+  periodoId?: number;  
 }
 
 export interface UserFilters extends PaginationParams {
