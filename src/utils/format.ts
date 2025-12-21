@@ -9,15 +9,26 @@ import { parseISO } from 'date-fns';
  * Formatear fecha sin problemas de timezone
  * Convierte "2025-12-04" o Date a "04/12/2025"
  */
-export const formatDate = (date: string | Date): string => {
-  // Si es string en formato ISO (YYYY-MM-DD), extraer directamente
-  if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}/.test(date)) {
-    const [year, month, day] = date.split('T')[0]!.split('-');
-    return `${day}/${month}/${year}`;
+export const formatDate = (date: string | Date | null | undefined): string => {
+  // Manejar valores nulos o indefinidos
+  if (!date) return '-';
+
+  // Si es string en formato ISO (YYYY-MM-DD o YYYY-MM-DDTHH:mm:ss)
+  if (typeof date === 'string') {
+    // Extraer solo la parte de fecha (antes de 'T' si existe)
+    const dateOnly = date.split('T')[0];
+    if (dateOnly && /^\d{4}-\d{2}-\d{2}$/.test(dateOnly)) {
+      const [year, month, day] = dateOnly.split('-');
+      return `${day}/${month}/${year}`;
+    }
   }
 
   // Si es Date, convertir evitando timezone
   const d = date instanceof Date ? date : new Date(date);
+  
+  // Validar que la fecha sea válida
+  if (isNaN(d.getTime())) return '-';
+  
   const day = String(d.getDate()).padStart(2, '0');
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const year = d.getFullYear();
