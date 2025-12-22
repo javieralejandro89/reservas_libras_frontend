@@ -64,6 +64,31 @@ export const formatDateTime = (date: string | Date): string => {
 };
 
 /**
+ * Extraer solo la fecha de un DateTime UTC y formatearla en hora de México
+ */
+export const formatDateFromUTC = (date: string | Date | null | undefined): string => {
+  if (!date) return '-';
+
+  try {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    
+    if (isNaN(dateObj.getTime())) {
+      return '-';
+    }
+
+    // Formatear solo fecha usando timezone de México
+    return new Intl.DateTimeFormat('es-MX', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      timeZone: 'America/Mexico_City',
+    }).format(dateObj);
+  } catch {
+    return '-';
+  }
+};
+
+/**
  * Formatear fecha relativa (hace X días)
  */
 export const formatRelativeDate = (date: string | Date): string => {

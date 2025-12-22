@@ -118,6 +118,7 @@ export const ESTADOS_MEXICO = [
   'Jalisco',
   'Michoacán',
   'Monterrey',  
+  'Morelos',
   'Puebla',
   'Puerto Vallarta',
   'Querétaro',  

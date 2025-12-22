@@ -5,7 +5,7 @@
 import { Badge, Button } from '@/components/ui';
 import { useUIStore, useAuthStore } from '@/stores';
 import { useReservas } from '@/hooks';
-import { formatLibras, formatDate } from '@/utils/format';
+import { formatLibras, formatDate, formatDateFromUTC } from '@/utils/format';
 import { STATUS_LABELS, STATUS_COLORS, STATUS_RESERVA, getAvailableStatuses, ROLES } from '@/constants';
 import { Edit, Trash2, ChevronLeft, ChevronRight, Calendar, Check, Truck, Home } from 'lucide-react';
 import { getInitials } from '@/utils/format';
@@ -210,7 +210,7 @@ export const ReservaTable = ({
                     <div className="flex items-center gap-2 text-xs">
                       <Calendar className="w-3 h-3 text-gray-400 flex-shrink-0" />
                       <span className="text-gray-600">Creada:</span>
-                      <span className="font-medium text-gray-900">{formatDate(reserva.createdAt)}</span>
+                      <span className="font-medium text-gray-900">{formatDateFromUTC(reserva.createdAt)}</span>
                     </div>
                     
                     {/* Confirmada */}
