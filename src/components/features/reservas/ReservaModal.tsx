@@ -12,7 +12,7 @@ import { useReservas, useReservaById, usePeriodos } from '@/hooks';
 import { VALIDATION_RULES, ESTADOS_MEXICO } from '@/constants';
 import { toInputDate, formatDate, formatLibras } from '@/utils/format';
 import toast from 'react-hot-toast';
-import type { CreateReservaDTO } from '@/types';
+import type { CreateReservaDTO, PeriodoLibras } from '@/types';
 import { AxiosError } from 'axios';
 
 const reservaSchema = z.object({
@@ -38,7 +38,9 @@ export const ReservaModal = ({ onSuccess }: ReservaModalProps) => {
   const { isReservaModalOpen, reservaModalMode, reservaModalId, closeReservaModal } = useUIStore();
   const { createReserva, isCreating, updateReserva, isUpdating } = useReservas();
   const { data: reservaResponse } = useReservaById(reservaModalId);
-  const { periodos, isLoading: isLoadingPeriodos } = usePeriodos({ isActive: true });
+  const { periodosDisponibles, isLoadingDisponibles } = usePeriodos();
+  const periodos = periodosDisponibles;
+  const isLoadingPeriodos = isLoadingDisponibles;
   const reservaData = reservaResponse?.data.data;
 
   const [selectedPeriodoId, setSelectedPeriodoId] = useState<number | null>(null);
@@ -68,7 +70,7 @@ export const ReservaModal = ({ onSuccess }: ReservaModalProps) => {
       console.log('📦 Procesando', periodos.length, 'periodos');
       
       const periodosConDisp = periodos
-        .map(periodo => {
+        .map((periodo: PeriodoLibras) => {
           console.log('🔧 Periodo:', {
             id: periodo.id,
             fechaEnvio: periodo.fechaEnvio,
@@ -78,7 +80,7 @@ export const ReservaModal = ({ onSuccess }: ReservaModalProps) => {
           });
 
           // Calcular libras reservadas (excluyendo canceladas)
-          const librasReservadas = (periodo.reservas || []).reduce((sum, reserva) => {
+          const librasReservadas = (periodo.reservas || []).reduce((sum: number, reserva: any) => {
             if (reserva.status !== 'CANCELADA') {
               return sum + parseFloat(reserva.libras.toString());
             }
@@ -99,14 +101,14 @@ export const ReservaModal = ({ onSuccess }: ReservaModalProps) => {
             disponibles: disponibles,
           };
         })
-        .filter(p => p.disponibles > 0);
+        .filter((p: { id: number; fechaEnvio: string; disponibles: number }) => p.disponibles > 0);
 
       console.log('✅ Periodos con disponibilidad:', periodosConDisp);
       setPeriodosDisponibilidad(periodosConDisp);
     } else {
       console.log('❌ No hay periodos o está vacío');
     }
-  }, [periodos]);
+  }, [periodos, isLoadingPeriodos]);
 
   // Cargar datos si es edición
   useEffect(() => {
@@ -205,28 +207,28 @@ export const ReservaModal = ({ onSuccess }: ReservaModalProps) => {
 
         {/* Fecha de envío - Select en modo crear, Input disabled en modo editar */}
         {reservaModalMode === 'create' ? (
-  <Select
-    {...register('fecha')}
-    label="Fecha de envío"
-    error={errors.fecha?.message}
-    disabled={isLoadingPeriodos}
-    onChange={(e) => {
-      // Encontrar el periodo seleccionado
-      const fechaSeleccionada = e.target.value;
-      const periodo = periodosDisponibilidad.find(
-        p => toInputDate(p.fechaEnvio) === fechaSeleccionada
-      );
-      setSelectedPeriodoId(periodo?.id || null);
-    }}
-    options={[
-      { value: '', label: isLoadingPeriodos ? 'Cargando...' : 'Selecciona una fecha de envío' },
-      ...periodosDisponibilidad.map((p) => ({
-        value: toInputDate(p.fechaEnvio),
-        label: `${formatDate(p.fechaEnvio)} (${formatLibras(p.disponibles)} disponibles)`,
-      })),
-    ]}
-    required
-  />
+          <Select
+            {...register('fecha')}
+            label="Fecha de envío"
+            error={errors.fecha?.message}
+            disabled={isLoadingPeriodos}
+            onChange={(e) => {
+              // Encontrar el periodo seleccionado
+              const fechaSeleccionada = e.target.value;
+              const periodo = periodosDisponibilidad.find(
+                p => toInputDate(p.fechaEnvio) === fechaSeleccionada
+              );
+              setSelectedPeriodoId(periodo?.id || null);
+            }}
+            options={[
+              { value: '', label: isLoadingPeriodos ? 'Cargando...' : 'Selecciona una fecha de envío' },
+              ...periodosDisponibilidad.map((p) => ({
+                value: toInputDate(p.fechaEnvio),
+                label: `${formatDate(p.fechaEnvio)} (${formatLibras(p.disponibles)} disponibles)`,
+              })),
+            ]}
+            required
+          />
         ) : (
           <Input
             {...register('fecha')}

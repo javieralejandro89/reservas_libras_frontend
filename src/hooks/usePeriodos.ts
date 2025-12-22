@@ -43,6 +43,21 @@ export const usePeriodos = (filters?: PeriodoFilters) => {
   });
 
   /**
+   * Query: Obtener periodos disponibles para crear reservas
+   */
+  const {
+    data: periodosDisponiblesData,
+    isLoading: isLoadingDisponibles,
+    error: errorDisponibles,
+  } = useQuery({
+    queryKey: ['periodos', 'disponibles'],
+    queryFn: async () => {
+      const response = await periodosApi.getAvailable();
+      return response.data.data;
+    },
+  });
+
+  /**
    * Query: Obtener periodo por ID
    */
   const usePeriodoById = (periodoId: number | null) => {
@@ -111,6 +126,12 @@ export const usePeriodos = (filters?: PeriodoFilters) => {
     isLoadingActive,
     errorActive,
     refetchActive,
+
+    // Disponibles
+    periodosDisponibles: periodosDisponiblesData || [],
+    isLoadingDisponibles,
+    errorDisponibles,
+
 
     // Get by ID
     usePeriodoById,

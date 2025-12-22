@@ -226,6 +226,14 @@ export const periodosApi = {
   },
 
   /**
+   * Get periodos disponibles para crear reservas
+   */
+  getAvailable: () => {
+    return apiClient.get<ApiResponse<PeriodoLibras[]>>('/periodos/available');
+  },
+
+  
+  /**
    * Get periodo by ID (admin)
    */
   getById: (periodoId: number) => {
@@ -245,7 +253,8 @@ export const periodosApi = {
   close: (periodoId: number) => {
     return apiClient.post<ApiResponse<HistoricoPeriodo>>(`/periodos/${periodoId}/close`);
   },
-};
+
+  };
 
 // ============================================
 // DASHBOARD
