@@ -58,7 +58,7 @@ export const Navbar = () => {
                 <img 
                   src="/logo.png" 
                   alt="SB Paquetería" 
-                  className="h-10 w-auto object-contain transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-lg"
+                  className="h-14 w-auto object-contain transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-lg"
                 />
               </div>
               
