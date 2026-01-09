@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores';
 import { ROUTES } from '@/constants';
-import { SnowEffect } from '@/components/effects'; 
+//import { SnowEffect } from '@/components/effects'; 
 
 // Layouts
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
@@ -34,11 +34,11 @@ function App() {
   return (
     <>
       {/* Efecto de nieve navideño */}
-      <SnowEffect 
+     {/* <SnowEffect 
   count={50} 
   enabled={true}
   colors={['#87CEEB', '#6495ED', '#4169E1', '#1E90FF', '#00BFFF']} // Rojo, verde, dorado, plata
-/>
+/> */}
     <Routes>
       {/* Rutas públicas (redirigen si ya estás autenticado) */}
       <Route element={<PublicRoute />}>
