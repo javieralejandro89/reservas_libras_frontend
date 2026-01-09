@@ -2,4 +2,4 @@
  * Exports de componentes de efectos
  */
 
-export { SnowEffect } from './SnowEffect';
+/** export { SnowEffect } from './SnowEffect';*/

@@ -119,4 +119,4 @@ export const SnowEffect = ({
 `}</style>
     </div>
   );
-};
+}; 
